@@ -26,6 +26,13 @@ class StokTakip:
     def urun_ekle(self, urun):
         self.urunler.append(urun)
 
+    def urun_guncelle(self, urun_adi, yeni_stok):
+        for urun in self.urunler:
+            if urun.ad == urun_adi:
+                urun.stok = yeni_stok
+                return urun
+        return None
+
     def siparis_olustur(self, urun_adi, miktar):
         for urun in self.urunler:
             if urun.ad == urun_adi:
@@ -70,6 +77,14 @@ class StokTakipApp:
         self.lst_siparisler = tk.Listbox(root, width=50)
         self.lst_siparisler.grid(row=6, column=1)
 
+        # Stok Güncelleme Alanı
+        tk.Label(root, text="Yeni Stok Miktarı:").grid(row=7, column=0)
+        self.entry_yeni_stok_miktari = tk.Entry(root)
+        self.entry_yeni_stok_miktari.grid(row=7, column=1)
+
+        self.btn_stok_guncelle = tk.Button(root, text="Stok Güncelle", command=self.stok_guncelle)
+        self.btn_stok_guncelle.grid(row=8, column=0, columnspan=2)
+
     def urun_ekle(self):
         ad = self.entry_urun_adi.get()
         try:
@@ -105,6 +120,27 @@ class StokTakipApp:
                     messagebox.showerror("Hata", "Miktar pozitif olmalı!")
             except ValueError:
                 messagebox.showerror("Hata", "Miktar sayı olmalıdır!")
+        else:
+            messagebox.showerror("Hata", "Lütfen bir ürün seçin!")
+
+    def stok_guncelle(self):
+        secili = self.lst_urunler.curselection()
+        if secili:
+            urun_ad = self.lst_urunler.get(secili[0]).split(" - ")[0]
+            try:
+                yeni_stok = int(self.entry_yeni_stok_miktari.get())
+                if yeni_stok >= 0:
+                    urun = self.stok_takip.urun_guncelle(urun_ad, yeni_stok)
+                    if urun:
+                        self.guncelle_urun_listesi()
+                        messagebox.showinfo("Başarılı", f"Stok güncellendi! Yeni Stok: {yeni_stok}")
+                        self.entry_yeni_stok_miktari.delete(0, tk.END)
+                    else:
+                        messagebox.showerror("Hata", "Ürün bulunamadı!")
+                else:
+                    messagebox.showerror("Hata", "Yeni stok miktarı negatif olamaz!")
+            except ValueError:
+                messagebox.showerror("Hata", "Stok miktarı sayı olmalıdır!")
         else:
             messagebox.showerror("Hata", "Lütfen bir ürün seçin!")
 
